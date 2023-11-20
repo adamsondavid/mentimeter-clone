@@ -1,24 +1,44 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useAbly } from "./composables/ably";
 import { useServer } from "./composables/server";
+import { ref } from "vue";
 
+const ably = useAbly();
 const server = useServer();
 
-const name = ref("");
-const greeting = ref("");
+const message = ref("");
+const messages = ref<string[]>([]);
 
-const submit = async () => {
-  if (!name.value) return;
-  const { status, body } = await server.greet({ params: { name: name.value } });
-  if (status === 200) greeting.value = body;
-};
+ably.channels.get("chat").subscribe((msg) => messages.value.unshift(msg.data));
+
+async function send() {
+  server.sendMessage({ body: { message: message.value } });
+  message.value = "";
+}
 </script>
 
 <template>
-  <h1>Welcome to my ts-rest fullstak demo w/ vite</h1>
-  <form @submit.prevent="submit">
-    <input placeholder="The name..." v-model="name" data-cy="input" />
-    <button data-cy="submit">Submit</button>
+  <h1>chat app</h1>
+  <div class="container">
+    <div class="message" v-for="message of messages" :key="message">{{ message }}</div>
+  </div>
+  <form @submit.prevent="send">
+    <input v-model="message" />
+    <button>Send!</button>
   </form>
-  <div data-cy="greeting">{{ greeting }}</div>
 </template>
+
+<style scoped>
+.container {
+  height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.message {
+  width: fit-content;
+  background: #f3f3f3;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+</style>

@@ -1,22 +1,23 @@
-import { InjectionKey, createApp, inject } from "vue";
+import { createApp, inject, InjectionKey } from "vue";
 import { initClient } from "@ts-rest/core";
 import { contract } from "../../common/contract";
 
 const SERVER: InjectionKey<typeof server> = Symbol();
-const server = initClient(contract, {
+export const server = initClient(contract, {
   baseUrl: "",
   baseHeaders: {},
   throwOnUnknownStatus: true,
+  jsonQuery: true,
 });
 
-export const initServer = () => {
+export function initServer() {
   return {
     install(app: ReturnType<typeof createApp>) {
       app.provide(SERVER, server);
     },
   };
-};
+}
 
-export function useServer(): typeof server {
+export function useServer() {
   return inject(SERVER)!;
 }

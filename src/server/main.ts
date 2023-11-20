@@ -1,14 +1,9 @@
 import express from "express";
-import { initServer, createExpressEndpoints } from "@ts-rest/express";
+import { createExpressEndpoints } from "@ts-rest/express";
 import { contract } from "../common/contract";
-
-const router = initServer().router(contract, {
-  async greet({ params }) {
-    return { status: 200, body: `Hello ${params.name}` };
-  },
-});
+import { router } from "./router";
 
 export const app = express()
   .use(express.urlencoded({ extended: false }))
   .use(express.json());
-createExpressEndpoints(contract, router, app);
+createExpressEndpoints(contract, router, app, { responseValidation: true, jsonQuery: true });

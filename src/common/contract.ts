@@ -1,15 +1,22 @@
 import { initContract } from "@ts-rest/core";
+import Ably from "ably";
 import { z } from "zod";
 
-export const contract = initContract().router({
-  greet: {
+const c = initContract();
+export const contract = c.router({
+  getAblyTokenRequest: {
     method: "GET",
-    path: "/api/greeting/:name",
-    pathParams: z.object({
-      name: z.string(),
-    }),
+    path: "/api/ably-token-request",
     responses: {
-      200: z.string(),
+      200: c.type<Ably.Types.TokenRequest>(),
+    },
+  },
+  sendMessage: {
+    method: "POST",
+    path: "/api/message",
+    body: z.object({ message: z.string() }),
+    responses: {
+      200: z.object({ message: z.string() }),
     },
   },
 });
