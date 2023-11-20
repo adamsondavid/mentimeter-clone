@@ -6,4 +6,7 @@ export default defineConfig({
     experimentalStudio: true,
     baseUrl: "http://localhost:5173",
   },
+  env: {
+    ABLY_API_KEY: "",
+  },
 });
