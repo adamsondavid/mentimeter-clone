@@ -1,3 +1,3 @@
-# tapw
+# mentimeter-clone
 
-A simple tempalte for scaffolding fullstack applications with ts-rest & vue that can easily be deployed to vercel.
+A simple mentimeter clone, built with ts-rest, express and vue. Deployed to on vercel.
