@@ -22,7 +22,7 @@ jobs:
         with:
           start: npm run dev
         env:
-          CYPRESS_ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
+          ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
         with:
