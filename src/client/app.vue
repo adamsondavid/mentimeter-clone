@@ -40,5 +40,6 @@ async function send() {
   background: #f3f3f3;
   border-radius: 4px;
   padding: 0.5em;
+  margin: 0.5em;
 }
 </style>
