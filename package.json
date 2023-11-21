@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "author": "David Adamson",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "tsx watch --ignore 'vite.config.ts.timestamp-*.mjs' --ignore 'src/client/**/*' src/main.dev.ts",
     "lint": "eslint --ext .vue,.ts --ignore-path .gitignore . && prettier --ignore-path .gitignore --check .",
