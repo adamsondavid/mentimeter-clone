@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "author": "David Adamson",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch --ignore 'vite.config.ts.timestamp-*.mjs' --ignore 'src/client/**/*' src/main.dev.ts",
     "lint": "eslint --ext .vue,.ts --ignore-path .gitignore . && prettier --ignore-path .gitignore --check .",
     "test:e2e": "cypress run --browser chrome",
-    "check": "vue-tsc --noEmit"
+    "check": "vue-tsc --noEmit",
+    "build": "vite build && esbuild --bundle --platform=node --format=esm --sourcemap --outfile=api/index.js src/server/main.ts"
   },
   "dependencies": {
     "@ts-rest/core": "^3.28.0",
@@ -27,6 +28,7 @@
     "@vue/eslint-config-prettier": "^8.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",
     "cypress": "^13.5.1",
+    "esbuild": "^0.19.7",
     "eslint": "^8.54.0",
     "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-vue": "^9.18.1",
