@@ -1,23 +1,15 @@
-import { createApp, inject, InjectionKey } from "vue";
-import { initClient } from "@ts-rest/core";
+import { initClient, tsRestFetchApi } from "@ts-rest/core";
 import { contract } from "../../common/contract";
+import { useClientId } from "./client-id";
 
-const SERVER: InjectionKey<typeof server> = Symbol();
-export const server = initClient(contract, {
+const server = initClient(contract, {
   baseUrl: "",
-  baseHeaders: {},
+  baseHeaders: { "x-client-id": "" },
   throwOnUnknownStatus: true,
   jsonQuery: true,
+  api(args) {
+    args.headers["x-client-id"] = useClientId().value;
+    return tsRestFetchApi(args);
+  },
 });
-
-export function initServer() {
-  return {
-    install(app: ReturnType<typeof createApp>) {
-      app.provide(SERVER, server);
-    },
-  };
-}
-
-export function useServer() {
-  return inject(SERVER)!;
-}
+export const useServer = () => server;

@@ -1,48 +1,63 @@
 <script setup lang="ts">
 import { useAbly } from "./composables/ably";
 import { useServer } from "./composables/server";
-import { v4 as uuid } from "uuid";
-import { useStorage } from "@vueuse/core";
-import { Ref, ref } from "vue";
-import { Answer, Question, Vote } from "../common/contract";
+import { ref } from "vue";
+import { Answer, Choice, Question } from "../common/contract";
+import { useClientId } from "./composables/client-id";
 
-const ably = useAbly();
+const presentationId = "12345678";
+
+const ably = useAbly(presentationId);
 const server = useServer();
 
-const voteId: Ref<string> = useStorage("vote-id", uuid());
-const votes = ref(new Map<string, Answer>());
+const presentation = ably.channels.get(presentationId);
+
+const present = ref(new Map<string, number>());
+presentation.presence.enter();
+presentation.presence.subscribe(({ action, clientId }) => {
+  if (action === "present" || action === "enter") present.value.set(clientId, (present.value.get(clientId) ?? 0) + 1);
+  if (action === "absent" || action === "leave") present.value.set(clientId, (present.value.get(clientId) ?? 0) - 1);
+  if (present.value.get(clientId) === 0) present.value.delete(clientId);
+});
+
+const answerId = useClientId();
+const answers = ref(new Map<string, Choice>());
 const question = ref<Question>({
   id: "a2a4fff8-f1f3-4c20-879a-afe966519fb8",
   question: "What are we going to have for lunch today?",
-  answers: [
-    { id: "4da51e17-0ccf-4696-adfd-93f2b3e7b4fc", answer: "Pizza 🍕" },
-    { id: "0c0cdf84-a449-4c4d-b2b0-9d88e9a91493", answer: "Sushi 🍱" },
-    { id: "5d5c3068-b289-4c1e-8cdf-441a10743942", answer: "Pasta 🍝" },
+  choices: [
+    { id: "4da51e17-0ccf-4696-adfd-93f2b3e7b4fc", choice: "Pizza 🍕" },
+    { id: "0c0cdf84-a449-4c4d-b2b0-9d88e9a91493", choice: "Sushi 🍱" },
+    { id: "5d5c3068-b289-4c1e-8cdf-441a10743942", choice: "Pasta 🍝" },
   ],
 });
 
-const vote = (answer: Answer) => server.vote({ body: { id: voteId.value, answerId: answer.id } });
-ably.channels.get("main").subscribe("vote", ({ data: vote }: { data: Vote }) => {
-  votes.value.set(vote.id, question.value.answers.find((answer) => answer.id === vote.answerId)!);
+const answer = (choice: Choice) => {
+  server.putAnswer({ params: { presentationId, questionId: question.value.id }, body: { choiceId: choice.id } });
+};
+
+presentation.subscribe(({ data: answer }: { data: Answer }) => {
+  answers.value.set(answer.id, question.value.choices.find((choice) => choice.id === answer.choiceId)!);
 });
 </script>
 
 <template>
   <div>
+    <p>Currently {{ present.size }} users are viewing this page</p>
     <h1>{{ question.question }}</h1>
-    <button v-for="answer of question.answers" :key="answer.id" @click="vote(answer)">
-      {{ answer.answer }}
+    <button v-for="choice of question.choices" :key="choice.id" @click="answer(choice)">
+      {{ choice.choice }}
     </button>
   </div>
   <div>
     <h1>Results</h1>
-    <div v-for="answer of question.answers" :key="answer.id">
-      {{ answer.answer }}
-      {{ [...votes.values()].filter((a) => answer === a).length }}
+    <div v-for="choice of question.choices" :key="choice.id">
+      {{ choice.choice }}
+      {{ [...answers.values()].filter((c) => choice === c).length }}
     </div>
-    <p v-if="votes.get(voteId)">
-      You voted for
-      {{ votes.get(voteId)!.answer }}
+    <p v-if="answers.get(answerId)">
+      You answered
+      {{ answers.get(answerId)!.choice }}
     </p>
   </div>
 </template>
