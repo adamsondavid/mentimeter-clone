@@ -8,8 +8,8 @@ export function initRouter(ably: Ably.Types.RestPromise) {
       const token = await ably.auth.createTokenRequest({ capability: { "*": ["subscribe"] } });
       return { status: 200, body: token };
     },
-    async sendMessage({ body }) {
-      await ably.channels.get("chat").publish("chat-message", body.message);
+    async vote({ body }) {
+      await ably.channels.get("main").publish("vote", body);
       return { status: 200, body };
     },
   });
